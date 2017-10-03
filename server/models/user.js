@@ -60,6 +60,17 @@ userSchema.methods.generateAuthToken = function() {
     });
 };
 
+userSchema.methods.removeToken = function(token) {
+    var user = this;
+    
+    //this update method is a local method which removes the entire token  from the array 
+    return user.update({
+        $pull: {
+            tokens: {token}
+        }
+    });
+};
+
 userSchema.statics.findByToken = function(token) {
     var User = this;
     var decoded;

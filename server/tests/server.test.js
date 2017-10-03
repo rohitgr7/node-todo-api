@@ -3,6 +3,7 @@ const request = require('supertest');
 const {ObjectID} = require('mongodb');
 
 const {Todo} = require('./../models/todo');
+const {User} = require('./../models/user');
 const {app} = require('./../server');
 const {todos , users , populateTodos , populateUsers} = require('./seed/seed');
 
@@ -211,5 +212,75 @@ describe('GET /users/me' , () => {
     });
 
 });
+
+describe('POST /users' , () => {
+
+    it('should create a user' , (done) => {
+        var email = 'example@example.com';
+        var password = "123abcdef";
+
+        request(app)
+            .post('/users')
+            .send({email , password})
+            .end((err , res) => {
+            if(err) {
+                return done(err);
+            }
+
+            expect(res.status).to.equal(200);
+            expect(res.headers['x-auth']).to.exist;
+            expect(res.body.email).to.exist;
+            expect(res.body.email).to.equal('example@example.com');
+
+            User.findOne( {email} )
+                .then((user) => {
+                expect(user).to.exist;
+                expect(user.password).to.not.equal(password);
+                done();
+            });
+        });
+    });
+
+    it('should return validation errors if request invalid' , (done) => {
+        var email = 'example@example';
+        var password = '12345678';
+
+        request(app)
+            .post('/users')
+            .send( {email , password} )
+            .end((err , res) => {
+            expect(res.status).to.equal(400);
+            done();
+        });
+    });
+
+    it('should not create user if email in use' , (done) => {
+        var email = users[0].email;
+        var password = '123qwer';
+
+        request(app)
+            .post('/users')
+            .send( {email , password} )
+            .end((err , res) => {
+            expect(res.status).to.equal(400);
+            done();
+        });
+    });
+
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 

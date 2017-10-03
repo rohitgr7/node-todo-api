@@ -2,26 +2,15 @@ const expect = require('chai').expect;
 const request = require('supertest');
 const {ObjectID} = require('mongodb');
 
-const {app} = require('./../server');
 const {Todo} = require('./../models/todo');
+const {app} = require('./../server');
+const {todos , users , populateTodos , populateUsers} = require('./seed/seed');
 
-const todos = [{
-    _id: new ObjectID(),
-    text: 'First test todo'
-}, {
-    _id: new ObjectID(),
-    text: 'Second test todo',
-    completed: true,
-    completedAt: 333
-}];
-
-beforeEach((done) => {
-    Todo.remove({}).then(() => {
-        return Todo.insertMany(todos);
-    }).then(() => done());
-});
+beforeEach(populateUsers);
+beforeEach(populateTodos);
 
 describe('POST /todos', () => {
+
     it('should create a new todo', (done) => {
         var text = 'Test todo text';
 
@@ -62,9 +51,11 @@ describe('POST /todos', () => {
             }).catch((e) => done(e));
         });
     });
+
 });
 
 describe('GET /todos', () => {
+
     it('should get all todos', (done) => {
         request(app)
             .get('/todos')
@@ -74,9 +65,11 @@ describe('GET /todos', () => {
             done();
         });
     });
+
 });
 
 describe('GET /todos/:id', () => {
+
     it('should return todo doc', (done) => {
         request(app)
             .get(`/todos/${todos[0]._id.toHexString()}`)
@@ -148,9 +141,11 @@ describe('DELETE /todos/:id', () => {
             done();
         });
     });
+
 });
 
 describe('PATCH /todos/:id', () => {
+
     it('should update the todo', (done) => {
         var hexId = todos[0]._id.toHexString();
         var text = 'This should be the new text';
@@ -188,4 +183,33 @@ describe('PATCH /todos/:id', () => {
             done();
         });
     });
+
 });
+
+describe('GET /users/me' , () => {
+
+    it('should return user if authenticated' , (done) => {
+        request(app)
+            .get('/users/me')
+            .set('x-auth' , users[0].tokens[0].token)
+            .end((err , res) => {
+            expect(res.status).to.equal(200);
+            expect(res.body._id).to.equal(users[0]._id.toHexString());
+            expect(res.body.email).to.equal(users[0].email);
+            done();
+        });
+    });
+
+    it('should return a 401 if not authenticated' , (done) => {
+        request(app)
+            .get('/users/me')
+            .end((err , res) => {
+            expect(res.status).to.equal(401);
+            expect(res.body).to.be.empty;
+            done();
+        });
+    });
+
+});
+
+

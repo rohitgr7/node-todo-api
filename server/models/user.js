@@ -6,6 +6,13 @@ const _ = require('lodash');
 const bcrypt = require('bcryptjs');
 
 var userSchema = new Schema({
+    name: {
+        type: String,
+        required: true,
+        trim: true,
+        minlength: 2
+    },
+    
     email: {
         type: String,
         required: true,
@@ -42,7 +49,7 @@ userSchema.methods.toJSON = function() {
     var user = this;
     var userObject = user.toObject();
 
-    return _.pick(userObject , ['_id' , 'email']);
+    return _.pick(userObject , ['name' , 'email' , '_id']);
 };
 
 userSchema.methods.generateAuthToken = function() {
@@ -63,7 +70,7 @@ userSchema.methods.generateAuthToken = function() {
 userSchema.methods.removeToken = function(token) {
     var user = this;
     
-    //this update method is a local method which removes the entire token  from the array 
+    //this update method is a local method which removes the entire token from the array 
     return user.update({
         $pull: {
             tokens: {token}

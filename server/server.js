@@ -107,7 +107,7 @@ app.patch('/todos/:id', authenticate , (req, res) => {
 });
 
 app.post('/users' , (req , res) => {
-    var body = _.pick(req.body , ['email' , 'password']);
+    var body = _.pick(req.body , ['name' , 'email' , 'password']);
 
     var user = new User(body);
 

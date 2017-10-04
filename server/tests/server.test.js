@@ -276,12 +276,13 @@ describe('GET /users/me' , () => {
 describe('POST /users' , () => {
 
     it('should create a user' , (done) => {
+        var name = "Rohit"
         var email = 'example@example.com';
         var password = "123abcdef";
 
         request(app)
             .post('/users')
-            .send({email , password})
+            .send({name , email , password})
             .end((err , res) => {
             if(err) {
                 return done(err);
@@ -294,6 +295,7 @@ describe('POST /users' , () => {
 
             User.findOne( {email} )
                 .then((user) => {
+                expect(user.name).to.equal(name);
                 expect(user).to.exist;
                 expect(user.password).to.not.equal(password);
                 done();
@@ -302,12 +304,13 @@ describe('POST /users' , () => {
     });
 
     it('should return validation errors if request invalid' , (done) => {
+        var name = "Rohit"
         var email = 'example@example';
         var password = '12345678';
 
         request(app)
             .post('/users')
-            .send( {email , password} )
+            .send( {name , email , password} )
             .end((err , res) => {
             expect(res.status).to.equal(400);
             done();
@@ -315,12 +318,13 @@ describe('POST /users' , () => {
     });
 
     it('should not create user if email in use' , (done) => {
+        var name = "Rohit"
         var email = users[0].email;
         var password = '123qwer';
 
         request(app)
             .post('/users')
-            .send( {email , password} )
+            .send( {name , email , password} )
             .end((err , res) => {
             expect(res.status).to.equal(400);
             done();

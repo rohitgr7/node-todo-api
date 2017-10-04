@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const {Schema} = require('mongoose');
+const _ = require('lodash');
 
 const todoSchema = new Schema({
     text: {

@@ -405,6 +405,33 @@ describe('DELETE /users/me/token' , () => {
 
 });
 
+describe('PATCH /users/me/token' , () => {
+   
+    it('should update the user if password provided is correct' , (done) => {
+        request(app)
+        .patch('/users/me/token')
+        .set('x-auth' , users[0].tokens[0].token)
+        .send( {password: users[0].password , name: "NewUser1"} )
+        .end((err , res) => {
+            expect(res.status).to.equal(200);
+            expect(res.body.user.name).to.equal('NewUser1');
+            done();
+        });
+    });
+    
+    it('should return 401 if password is incorrect' , (done) => {
+        request(app)
+        .patch('/users/me/token')
+        .set('x-auth' , users[0].tokens[0].token)
+        .send( {password: users[1].password , name: 'NewUser1'} )
+        .end((err , res) => {
+            expect(res.status).to.equal(401);
+            done();
+        });
+    });
+    
+});
+
 
 
 

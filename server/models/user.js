@@ -12,7 +12,7 @@ var userSchema = new Schema({
         trim: true,
         minlength: 2
     },
-    
+
     email: {
         type: String,
         required: true,
@@ -69,12 +69,27 @@ userSchema.methods.generateAuthToken = function() {
 
 userSchema.methods.removeToken = function(token) {
     var user = this;
-    
+
     //this update method is a local method which removes the entire token from the array 
     return user.update({
         $pull: {
             tokens: {token}
         }
+    });
+};
+
+userSchema.methods.checkPassword = function(password) {
+    var user = this;
+    var result;
+    return new Promise((resolve , reject) => {
+        bcrypt.compare(password , user.password , (err , res) => {
+            if(err || !res) {
+                reject();
+            }
+            else {
+                resolve(user);
+            }
+        });
     });
 };
 
@@ -102,7 +117,7 @@ userSchema.statics.findByCredentials = function(email , password) {
         if(!user) {
             return Promise.reject();
         }
-        
+
         return new Promise((resolve , reject) => {
             bcrypt.compare(password , user.password , (err , res) => {
                 if(!res) {

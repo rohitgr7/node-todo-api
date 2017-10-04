@@ -101,7 +101,7 @@ app.patch('/todos/:id', authenticate , (req, res) => {
         }
 
         res.send({todo});
-    }).catch(() => {
+    }).catch((e) => {
         res.status(400).send();
     })
 });
@@ -146,6 +146,24 @@ app.delete('/users/me/token' , authenticate , (req , res) => {
     }).catch((e) => {
         res.status(400).send();
     });
+});
+
+app.patch('/users/me/token' , authenticate , (req , res) => {
+    var password = req.body.password;
+    var body = {};
+    if (req.body.name) {
+        body.name = req.body.name;
+    }
+
+    req.user.checkPassword(password)
+    .then(() => {
+        User.findByIdAndUpdate(req.user._id.toHexString() , {$set: body} , {new: true})
+            .then((user) => {
+            res.send({user}); 
+        });
+    }).catch((e) => {
+        res.status(401).send();
+    })
 });
 
 app.listen(port, () => {
